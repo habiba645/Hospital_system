@@ -1,0 +1,1 @@
+ D:\\hospital_system\\Hospital_system\\build\\7db68c9581ba296fb07d2fe0e7066597\\dart_build_result.json:  D:\\C\\flutter\\bin\\cache\\dart-sdk\\version D:\\hospital_system\\Hospital_system\\.dart_tool\\package_config.json D:\\hospital_system\\Hospital_system\\pubspec.yaml d:\\hospital_system\\hospital_system\\.dart_tool\\package_config.json
