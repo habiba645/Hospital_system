@@ -153,3 +153,39 @@ List<ActivityItemData> get defaultRecentActivities => const [
         iconBackground: AppColors.warningBg,
       ),
     ];
+
+/// Default front-desk activity feed used by the reception dashboard screen.
+List<ActivityItemData> get defaultReceptionActivities => const [
+      ActivityItemData(
+        title: 'Patient checked in',
+        subtitle: 'James Wilson → Cardiology · Dr. Nora Patel',
+        timeLabel: '5m ago',
+        icon: Icons.how_to_reg_outlined,
+        iconColor: AppColors.success,
+        iconBackground: AppColors.successBg,
+      ),
+      ActivityItemData(
+        title: 'New patient registered',
+        subtitle: 'Emma Clarke added to the system',
+        timeLabel: '18m ago',
+        icon: Icons.person_add_alt_1_outlined,
+        iconColor: AppColors.primary,
+        iconBackground: AppColors.sidebarActive,
+      ),
+      ActivityItemData(
+        title: 'Appointment rescheduled',
+        subtitle: 'Mia Thompson moved to 11:30 · Pediatrics',
+        timeLabel: '42m ago',
+        icon: Icons.event_repeat_outlined,
+        iconColor: AppColors.secondary,
+        iconBackground: AppColors.departmentChip,
+      ),
+      ActivityItemData(
+        title: 'Walk-in added',
+        subtitle: 'Omar Hassan queued for Dermatology',
+        timeLabel: '1h ago',
+        icon: Icons.directions_walk_outlined,
+        iconColor: AppColors.info,
+        iconBackground: AppColors.infoBg,
+      ),
+    ];
