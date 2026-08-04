@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:medidesk_app/core/theme/app_colors.dart';
+import 'package:medidesk_app/features/appointments/presentation/models/appointment.dart';
+import 'package:medidesk_app/features/appointments/presentation/widgets/appointment_search_bar.dart';
+import 'package:medidesk_app/features/appointments/presentation/widgets/appointments_header.dart';
+import 'package:medidesk_app/features/appointments/presentation/widgets/appointments_table.dart';
 
-class AppointmentsScreen extends StatelessWidget {
+class AppointmentsScreen extends StatefulWidget {
   const AppointmentsScreen({super.key});
+
+  @override
+  State<AppointmentsScreen> createState() => _AppointmentsScreenState();
+}
+
+class _AppointmentsScreenState extends State<AppointmentsScreen> {
+  String _query = '';
+  AppointmentStatus? _statusFilter;
+
+  List<Appointment> get _filtered {
+    return mockAppointments.where((appointment) {
+      final matchesQuery = _query.isEmpty ||
+          appointment.patientName.toLowerCase().contains(_query.toLowerCase()) ||
+          appointment.doctorName.toLowerCase().contains(_query.toLowerCase());
+      final matchesStatus = _statusFilter == null || appointment.status == _statusFilter;
+      return matchesQuery && matchesStatus;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,46 +32,19 @@ class AppointmentsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Appointments',
-                        style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary)),
-                    SizedBox(height: 4),
-                    Text('Create, edit, and track patient bookings.',
-                        style: TextStyle(
-                            fontSize: 14, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Create Appointment'),
-              ),
-            ],
+          AppointmentsHeader(
+            onCreatePressed: () {
+              // TODO: open the create-appointment flow once the backend/logic is wired up.
+            },
           ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: const Text('Appointments table UI goes here',
-                    style: TextStyle(color: AppColors.textSecondary)),
-              ),
-            ),
+          const SizedBox(height: 24),
+          AppointmentSearchBar(
+            onSearchChanged: (value) => setState(() => _query = value),
+            selectedStatus: _statusFilter,
+            onStatusChanged: (value) => setState(() => _statusFilter = value),
           ),
+          const SizedBox(height: 20),
+          Expanded(child: AppointmentsTable(appointments: _filtered)),
         ],
       ),
     );
