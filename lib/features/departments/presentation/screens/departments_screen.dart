@@ -1,8 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:medidesk_app/core/theme/app_colors.dart';
+import 'package:medidesk_app/features/departments/presentation/widgets/department_card.dart';
+import 'package:medidesk_app/features/departments/presentation/widgets/department_stats_grid.dart';
+import 'package:medidesk_app/features/departments/presentation/widgets/departments_header.dart';
+import 'package:medidesk_app/features/departments/presentation/widgets/departments_list.dart';
+import 'package:medidesk_app/features/departments/presentation/widgets/departments_toolbar.dart';
 
-class DepartmentsScreen extends StatelessWidget {
+class DepartmentsScreen extends StatefulWidget {
   const DepartmentsScreen({super.key});
+
+  @override
+  State<DepartmentsScreen> createState() => _DepartmentsScreenState();
+}
+
+class _DepartmentsScreenState extends State<DepartmentsScreen> {
+  final _searchController = TextEditingController();
+  late final List<DepartmentCardData> _allDepartments;
+
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _allDepartments = sampleDepartments;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<DepartmentCardData> get _filteredDepartments {
+    final query = _query.trim().toLowerCase();
+    if (query.isEmpty) return _allDepartments;
+    return _allDepartments.where((department) {
+      return department.name.toLowerCase().contains(query) ||
+          department.headDoctor.toLowerCase().contains(query) ||
+          department.description.toLowerCase().contains(query);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,44 +47,20 @@ class DepartmentsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Departments',
-                        style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary)),
-                    SizedBox(height: 4),
-                    Text('Organize hospital services by department.',
-                        style: TextStyle(
-                            fontSize: 14, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Department'),
-              ),
-            ],
+          DepartmentsHeader(onAddDepartment: () {}),
+          const SizedBox(height: 24),
+          DepartmentStatsGrid(items: defaultDepartmentStats),
+          const SizedBox(height: 24),
+          DepartmentsToolbar(
+            searchController: _searchController,
+            onSearchChanged: (value) => setState(() => _query = value),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           Expanded(
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: const Text('Departments list UI goes here',
-                    style: TextStyle(color: AppColors.textSecondary)),
-              ),
+            child: DepartmentsList(
+              departments: _filteredDepartments,
+              onDepartmentTap: (_) {},
+              onDepartmentEdit: (_) {},
             ),
           ),
         ],

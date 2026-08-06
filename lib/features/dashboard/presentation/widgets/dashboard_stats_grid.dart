@@ -105,3 +105,43 @@ List<DashboardStatItem> get defaultAdminStats => const [
         trendUp: true,
       ),
     ];
+
+/// Default front-desk stats used by the reception dashboard screen.
+List<DashboardStatItem> get defaultReceptionStats => const [
+      DashboardStatItem(
+        label: 'Patients Today',
+        value: '34',
+        icon: Icons.people_outline,
+        iconColor: AppColors.primary,
+        iconBackground: AppColors.sidebarActive,
+        trendLabel: '+6',
+        trendUp: true,
+      ),
+      DashboardStatItem(
+        label: 'Pending Check-ins',
+        value: '8',
+        icon: Icons.pending_actions_outlined,
+        iconColor: AppColors.warning,
+        iconBackground: AppColors.warningBg,
+        trendLabel: '-2',
+        trendUp: false,
+      ),
+      DashboardStatItem(
+        label: "Today's Appointments",
+        value: '127',
+        icon: Icons.calendar_month_outlined,
+        iconColor: AppColors.secondary,
+        iconBackground: AppColors.departmentChip,
+        trendLabel: '+12%',
+        trendUp: true,
+      ),
+      DashboardStatItem(
+        label: 'Waiting Room',
+        value: '5',
+        icon: Icons.hourglass_top_outlined,
+        iconColor: AppColors.info,
+        iconBackground: AppColors.infoBg,
+        trendLabel: '+1',
+        trendUp: true,
+      ),
+    ];
