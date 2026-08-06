@@ -1,8 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:medidesk_app/core/theme/app_colors.dart';
+import 'package:medidesk_app/features/receptionists/presentation/widgets/receptionist_card.dart';
+import 'package:medidesk_app/features/receptionists/presentation/widgets/receptionist_status_chip.dart';
+import 'package:medidesk_app/features/receptionists/presentation/widgets/receptionists_header.dart';
+import 'package:medidesk_app/features/receptionists/presentation/widgets/receptionists_list.dart';
+import 'package:medidesk_app/features/receptionists/presentation/widgets/receptionists_toolbar.dart';
 
-class ReceptionistsScreen extends StatelessWidget {
+class ReceptionistsScreen extends StatefulWidget {
   const ReceptionistsScreen({super.key});
+
+  @override
+  State<ReceptionistsScreen> createState() => _ReceptionistsScreenState();
+}
+
+class _ReceptionistsScreenState extends State<ReceptionistsScreen> {
+  static const _allFilter = 'All';
+
+  final _searchController = TextEditingController();
+  late final List<ReceptionistCardData> _allReceptionists;
+  late final List<String> _filterOptions;
+
+  String _query = '';
+  String _selectedFilter = _allFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    _allReceptionists = sampleReceptionists;
+    _filterOptions = [
+      _allFilter,
+      'Active',
+      'Inactive',
+      'On Break',
+    ];
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<ReceptionistCardData> get _filteredReceptionists {
+    final query = _query.trim().toLowerCase();
+    return _allReceptionists.where((receptionist) {
+      final matchesFilter = _selectedFilter == _allFilter ||
+          _statusLabel(receptionist.status) == _selectedFilter;
+      if (!matchesFilter) return false;
+      if (query.isEmpty) return true;
+      return receptionist.name.toLowerCase().contains(query) ||
+          receptionist.assignedDesk.toLowerCase().contains(query) ||
+          receptionist.email.toLowerCase().contains(query);
+    }).toList();
+  }
+
+  String _statusLabel(ReceptionistStatus status) => switch (status) {
+        ReceptionistStatus.active => 'Active',
+        ReceptionistStatus.inactive => 'Inactive',
+        ReceptionistStatus.onBreak => 'On Break',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -11,44 +66,22 @@ class ReceptionistsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Receptionists',
-                        style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary)),
-                    SizedBox(height: 4),
-                    Text('Manage front-desk staff accounts.',
-                        style: TextStyle(
-                            fontSize: 14, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Receptionist'),
-              ),
-            ],
+          ReceptionistsHeader(onAddReceptionist: () {}),
+          const SizedBox(height: 24),
+          ReceptionistsToolbar(
+            searchController: _searchController,
+            onSearchChanged: (value) => setState(() => _query = value),
+            filterOptions: _filterOptions,
+            selectedFilter: _selectedFilter,
+            onFilterSelected: (value) =>
+                setState(() => _selectedFilter = value),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           Expanded(
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: const Text('Receptionists list UI goes here',
-                    style: TextStyle(color: AppColors.textSecondary)),
-              ),
+            child: ReceptionistsList(
+              receptionists: _filteredReceptionists,
+              onReceptionistTap: (_) {},
+              onReceptionistEdit: (_) {},
             ),
           ),
         ],
