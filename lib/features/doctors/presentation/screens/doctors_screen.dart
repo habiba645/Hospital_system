@@ -1,23 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:medidesk_app/core/theme/app_colors.dart';
+import 'package:medidesk_app/features/doctors/presentation/widgets/doctor_card.dart';
+import 'package:medidesk_app/features/doctors/presentation/widgets/doctors_header.dart';
+import 'package:medidesk_app/features/doctors/presentation/widgets/doctors_list.dart';
+import 'package:medidesk_app/features/doctors/presentation/widgets/doctors_toolbar.dart';
 
-class DoctorsScreen extends StatelessWidget {
+class DoctorsScreen extends StatefulWidget {
   const DoctorsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const _PageScaffold(
-      title: 'Doctors',
-      subtitle: 'Manage doctor profiles, departments, and working hours.',
-    );
-  }
+  State<DoctorsScreen> createState() => _DoctorsScreenState();
 }
 
-class _PageScaffold extends StatelessWidget {
-  final String title;
-  final String subtitle;
+class _DoctorsScreenState extends State<DoctorsScreen> {
+  static const _allFilter = 'All';
 
-  const _PageScaffold({required this.title, required this.subtitle});
+  final _searchController = TextEditingController();
+  late final List<DoctorCardData> _allDoctors;
+  late final List<String> _filterOptions;
+
+  String _query = '';
+  String _selectedFilter = _allFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    _allDoctors = sampleDoctors;
+    final departments = _allDoctors.map((d) => d.department).toSet().toList()
+      ..sort();
+    _filterOptions = [_allFilter, ...departments];
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<DoctorCardData> get _filteredDoctors {
+    final query = _query.trim().toLowerCase();
+    return _allDoctors.where((doctor) {
+      final matchesFilter = _selectedFilter == _allFilter ||
+          doctor.department == _selectedFilter;
+      if (!matchesFilter) return false;
+      if (query.isEmpty) return true;
+      return doctor.name.toLowerCase().contains(query) ||
+          doctor.specialty.toLowerCase().contains(query) ||
+          doctor.department.toLowerCase().contains(query);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,47 +56,26 @@ class _PageScaffold extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary)),
-                    const SizedBox(height: 4),
-                    Text(subtitle,
-                        style: const TextStyle(
-                            fontSize: 14, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Doctor'),
-              ),
-            ],
+          DoctorsHeader(
+            title: 'Doctors',
+            subtitle: 'Manage doctor profiles, departments, and working hours.',
+            onAddDoctor: () {},
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+          DoctorsToolbar(
+            searchController: _searchController,
+            onSearchChanged: (value) => setState(() => _query = value),
+            filterOptions: _filterOptions,
+            selectedFilter: _selectedFilter,
+            onFilterSelected: (value) =>
+                setState(() => _selectedFilter = value),
+          ),
+          const SizedBox(height: 24),
           Expanded(
-            child: Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: const Text(
-                  'Doctors table / list UI goes here',
-                  style: TextStyle(color: AppColors.textSecondary),
-                ),
-              ),
+            child: DoctorsList(
+              doctors: _filteredDoctors,
+              onDoctorTap: (_) {},
+              onDoctorEdit: (_) {},
             ),
           ),
         ],
