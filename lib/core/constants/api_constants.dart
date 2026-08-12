@@ -1,7 +1,7 @@
 /// API configuration. Replace baseUrl with your backend endpoint.
 class ApiConstants {
   // TODO: Point to your real backend
-  static const String baseUrl = 'https://api.medidesk.example.com/v1';
+  static const String baseUrl = 'https://66ad-156-202-51-31.ngrok-free.app';
 
   // Auth
   static const String login = '/auth/login';

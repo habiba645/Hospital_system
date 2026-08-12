@@ -3,8 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:medidesk_app/core/constants/api_constants.dart';
 import 'package:medidesk_app/core/network/auth_interceptor.dart';
 
+
+
 class DioClient {
   late final Dio dio;
+  
 
   DioClient({String? baseUrl}) {
     dio = Dio(
@@ -15,6 +18,7 @@ class DioClient {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
       ),
     );
