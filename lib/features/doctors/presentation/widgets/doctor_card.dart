@@ -1,29 +1,11 @@
+// features/doctors/presentation/widgets/doctor_card.dart
 import 'package:flutter/material.dart';
 import 'package:medidesk_app/core/theme/app_colors.dart';
+import 'package:medidesk_app/features/doctors/models/model.dart';
 import 'package:medidesk_app/features/doctors/presentation/widgets/doctor_status_chip.dart';
 
-class DoctorCardData {
-  final String id;
-  final String name;
-  final String specialty;
-  final String department;
-  final String workingHours;
-  final String email;
-  final DoctorAvailability status;
-
-  const DoctorCardData({
-    required this.id,
-    required this.name,
-    required this.specialty,
-    required this.department,
-    required this.workingHours,
-    required this.email,
-    required this.status,
-  });
-}
-
 class DoctorCard extends StatelessWidget {
-  final DoctorCardData doctor;
+  final DoctorModel doctor;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
 
@@ -33,6 +15,10 @@ class DoctorCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
   });
+
+  DoctorAvailability get _status => doctor.workingDays.isEmpty
+      ? DoctorAvailability.onLeave
+      : DoctorAvailability.available;
 
   @override
   Widget build(BuildContext context) {
@@ -49,11 +35,7 @@ class DoctorCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.border),
             boxShadow: const [
-              BoxShadow(
-                color: AppColors.shadow,
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
+              BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: Offset(0, 2)),
             ],
           ),
           child: Column(
@@ -62,71 +44,46 @@ class DoctorCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _DoctorAvatar(name: doctor.name),
+                  _DoctorAvatar(name: doctor.fullName),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          doctor.name,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text(doctor.fullName,
+                            style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
-                        Text(
-                          doctor.specialty,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text(doctor.specialization,
+                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
                   IconButton(
                     onPressed: onEdit,
                     tooltip: 'Edit doctor',
-                    icon: const Icon(
-                      Icons.more_horiz_rounded,
-                      color: AppColors.textTertiary,
-                    ),
+                    icon: const Icon(Icons.more_horiz_rounded, color: AppColors.textTertiary),
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              _MetaRow(
-                icon: Icons.apartment_outlined,
-                label: doctor.department,
-              ),
+              _MetaRow(icon: Icons.apartment_outlined, label: departmentNameForId(doctor.deptId)),
               const SizedBox(height: 8),
-              _MetaRow(
-                icon: Icons.schedule_outlined,
-                label: doctor.workingHours,
-              ),
+              _MetaRow(icon: Icons.schedule_outlined, label: doctor.workingHoursLabel),
               const SizedBox(height: 8),
-              _MetaRow(
-                icon: Icons.email_outlined,
-                label: doctor.email,
-              ),
+              _MetaRow(icon: Icons.email_outlined, label: doctor.email),
+              const SizedBox(height: 8),
+              _MetaRow(icon: Icons.payments_outlined, label: '${doctor.consultationFee} EGP / visit'),
               const Spacer(),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  DoctorStatusChip(status: doctor.status),
+                  DoctorStatusChip(status: _status),
                   const Spacer(),
-                  TextButton(
-                    onPressed: onTap,
-                    child: const Text('View profile'),
-                  ),
+                  TextButton(onPressed: onTap, child: const Text('View profile')),
                 ],
               ),
             ],
@@ -139,7 +96,6 @@ class DoctorCard extends StatelessWidget {
 
 class _DoctorAvatar extends StatelessWidget {
   final String name;
-
   const _DoctorAvatar({required this.name});
 
   @override
@@ -149,20 +105,13 @@ class _DoctorAvatar extends StatelessWidget {
       backgroundColor: AppColors.primary.withValues(alpha: 0.15),
       child: Text(
         _initials(name),
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          color: AppColors.primary,
-        ),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary),
       ),
     );
   }
 
   String _initials(String value) {
-    final parts = value
-        .replaceFirst(RegExp(r'^Dr\.?\s*', caseSensitive: false), '')
-        .trim()
-        .split(RegExp(r'\s+'));
+    final parts = value.replaceFirst(RegExp(r'^Dr\.?\s*', caseSensitive: false), '').trim().split(RegExp(r'\s+'));
     if (parts.isEmpty || parts.first.isEmpty) return '?';
     if (parts.length == 1) return parts.first[0].toUpperCase();
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
@@ -172,7 +121,6 @@ class _DoctorAvatar extends StatelessWidget {
 class _MetaRow extends StatelessWidget {
   final IconData icon;
   final String label;
-
   const _MetaRow({required this.icon, required this.label});
 
   @override
@@ -182,15 +130,9 @@ class _MetaRow extends StatelessWidget {
         Icon(icon, size: 16, color: AppColors.textTertiary),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          child: Text(label,
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              maxLines: 1, overflow: TextOverflow.ellipsis),
         ),
       ],
     );

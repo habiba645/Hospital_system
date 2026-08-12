@@ -1,4 +1,8 @@
+
+// core/constants/api_constants.dart
+/// API configuration. Replace baseUrl with your backend endpoint.
 class ApiConstants {
+  // TODO: Point to your real backend
   static const String baseUrl = 'https://09f3-156-202-51-31.ngrok-free.app';
 
   // Auth
@@ -8,7 +12,8 @@ class ApiConstants {
   static const String me = '/auth/me';
 
   // Admin
-  static const String doctors = '/doctors';
+  static const String getDoctors = '/doctors';
+  
   static const String departments = '/departments';
   static const String receptionists = '/receptionists';
 
