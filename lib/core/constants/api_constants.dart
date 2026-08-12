@@ -1,7 +1,5 @@
-/// API configuration. Replace baseUrl with your backend endpoint.
 class ApiConstants {
-  // TODO: Point to your real backend
-  static const String baseUrl = 'https://66ad-156-202-51-31.ngrok-free.app';
+  static const String baseUrl = 'https://09f3-156-202-51-31.ngrok-free.app';
 
   // Auth
   static const String login = '/auth/login';
@@ -17,8 +15,12 @@ class ApiConstants {
   // Reception
   static const String patients = '/patients';
   static const String appointments = '/appointments';
-  static const String scheduleToday = '/schedule/today';
-  static const String scheduleWeekly = '/schedule/weekly';
+
+  // Schedule
+  static const String scheduleAdd = '/schedule/';
+  static String scheduleByDoctor(int doctorId) => '/schedule/$doctorId';
+  static String scheduleById(int scheduleId) => '/schedule/$scheduleId';
+  static String scheduleByDay(int doctorId) => '/schedule/day/$doctorId';
 
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 15);

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medidesk_app/features/schedule/presentation/models/schedule_models.dart';
+import 'package:medidesk_app/features/schedule/data/models/schedule_models.dart';
 
 /// Small event block placed on the weekly grid representing one appointment.
 class WeeklyAppointmentCard extends StatelessWidget {

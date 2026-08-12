@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medidesk_app/core/theme/app_colors.dart';
-import 'package:medidesk_app/features/appointments/presentation/models/appointment.dart';
+import 'package:medidesk_app/features/appointments/data/models/appointment.dart';
 import 'package:medidesk_app/features/appointments/presentation/widgets/appointment_row.dart';
 
 /// Card containing the column headers + the list of [AppointmentRow]s.

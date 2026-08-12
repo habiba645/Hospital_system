@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:medidesk_app/core/theme/app_colors.dart';
-import 'package:medidesk_app/features/appointments/presentation/models/appointment.dart';
+import 'package:medidesk_app/features/appointments/data/models/appointment.dart';
 import 'package:medidesk_app/features/appointments/presentation/widgets/appointment_status_chip.dart';
 
 /// A single appointment row inside the appointments table.
