@@ -18,16 +18,16 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required bool isAdmin,
   }) async {
-    final user = await remoteDataSource.login(
+    final result = await remoteDataSource.login(
       email: email,
       password: password,
       isAdmin: isAdmin,
     );
 
-    // In a real flow the token comes in the same response.
-    // Expand the remote response model to also return the token and save it.
-    await localDataSource.saveUser(user);
-    return user;
+    await localDataSource.saveToken(result.token);
+    await localDataSource.saveUser(result.user);
+
+    return result.user;
   }
 
   @override

@@ -3,12 +3,19 @@ import 'package:medidesk_app/core/constants/api_constants.dart';
 import 'package:medidesk_app/core/network/dio_client.dart';
 import 'package:medidesk_app/features/auth/data/models/user_model.dart';
 
+class LoginResponse {
+  final String token;
+  final UserModel user;
+
+  LoginResponse({required this.token, required this.user});
+}
+
 class AuthRemoteDataSource {
   final DioClient _client;
 
   AuthRemoteDataSource(this._client);
 
-  Future<UserModel> login({
+  Future<LoginResponse> login({
     required String email,
     required String password,
     required bool isAdmin,
@@ -23,8 +30,10 @@ class AuthRemoteDataSource {
     );
 
     final data = response.data as Map<String, dynamic>;
-    // Expecting { token: "...", user: { ... } }
-    return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+    final token = data['token'] as String;
+    final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
+
+    return LoginResponse(token: token, user: user);
   }
 
   Future<void> logout() async {
