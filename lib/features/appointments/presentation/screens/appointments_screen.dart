@@ -1,32 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:medidesk_app/features/appointments/presentation/models/appointment.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:medidesk_app/features/appointments/cubit/cubit.dart';
+import 'package:medidesk_app/features/appointments/cubit/state.dart';
+import 'package:medidesk_app/features/appointments/data/appointments_repository.dart';
+import 'package:medidesk_app/features/appointments/data/models/appointment.dart'
+  ;
 import 'package:medidesk_app/features/appointments/presentation/widgets/appointment_search_bar.dart';
 import 'package:medidesk_app/features/appointments/presentation/widgets/appointments_header.dart';
 import 'package:medidesk_app/features/appointments/presentation/widgets/appointments_table.dart';
 
-class AppointmentsScreen extends StatefulWidget {
+class AppointmentsScreen extends StatelessWidget {
   const AppointmentsScreen({super.key});
 
   @override
-  State<AppointmentsScreen> createState() => _AppointmentsScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider<AppointmentsCubit>(
+      create: (context) => AppointmentsCubit(
+        context.read<AppointmentsRepository>(),
+      )..loadAppointments(),
+      child: const _AppointmentsView(),
+    );
+  }
 }
 
-class _AppointmentsScreenState extends State<AppointmentsScreen> {
-  String _query = '';
-  AppointmentStatus? _statusFilter;
-
-  List<Appointment> get _filtered {
-    return mockAppointments.where((appointment) {
-      final matchesQuery = _query.isEmpty ||
-          appointment.patientName.toLowerCase().contains(_query.toLowerCase()) ||
-          appointment.doctorName.toLowerCase().contains(_query.toLowerCase());
-      final matchesStatus = _statusFilter == null || appointment.status == _statusFilter;
-      return matchesQuery && matchesStatus;
-    }).toList();
-  }
+class _AppointmentsView extends StatelessWidget {
+  const _AppointmentsView();
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<AppointmentsCubit>();
+
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -34,17 +38,55 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
         children: [
           AppointmentsHeader(
             onCreatePressed: () {
-              // TODO: open the create-appointment flow once the backend/logic is wired up.
+              // TODO: open the create-appointment flow.
             },
           ),
+
           const SizedBox(height: 24),
-          AppointmentSearchBar(
-            onSearchChanged: (value) => setState(() => _query = value),
-            selectedStatus: _statusFilter,
-            onStatusChanged: (value) => setState(() => _statusFilter = value),
+
+          BlocBuilder<AppointmentsCubit, AppointmentsState>(
+            buildWhen: (_, state) =>
+                state is AppointmentsLoaded ||
+                state is AppointmentsInitial,
+            builder: (context, state) {
+              const AppointmentStatus? selectedStatus = null;
+
+              return AppointmentSearchBar(
+                onSearchChanged: cubit.search,
+                selectedStatus: selectedStatus,
+                onStatusChanged: cubit.filterByStatus,
+              );
+            },
           ),
+
           const SizedBox(height: 20),
-          Expanded(child: AppointmentsTable(appointments: _filtered)),
+
+          Expanded(
+            child: BlocBuilder<AppointmentsCubit, AppointmentsState>(
+              builder: (context, state) {
+                if (state is AppointmentsLoading ||
+                    state is AppointmentsInitial) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (state is AppointmentsError) {
+                  return Center(
+                    child: Text(state.message),
+                  );
+                }
+
+                if (state is AppointmentsLoaded) {
+                  return AppointmentsTable(
+                    appointments: state.appointments,
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
         ],
       ),
     );

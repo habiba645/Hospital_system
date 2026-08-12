@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medidesk_app/features/appointments/presentation/models/appointment.dart';
+import 'package:medidesk_app/features/appointments/data/models/appointment.dart';
 import 'package:medidesk_app/features/appointments/presentation/widgets/appointment_status_style.dart';
 
 /// Small pill showing an appointment's status with its themed color.

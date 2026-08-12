@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medidesk_app/core/theme/app_colors.dart';
-import 'package:medidesk_app/features/schedule/presentation/models/schedule_models.dart';
+import 'package:medidesk_app/features/schedule/data/models/schedule_models.dart';
 
 class ScheduleHourAxis extends StatelessWidget {
   final double topOffset;

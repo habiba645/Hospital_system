@@ -1,3 +1,4 @@
+
 // core/constants/api_constants.dart
 /// API configuration. Replace baseUrl with your backend endpoint.
 class ApiConstants {
@@ -19,8 +20,12 @@ class ApiConstants {
   // Reception
   static const String patients = '/patients';
   static const String appointments = '/appointments';
-  static const String scheduleToday = '/schedule/today';
-  static const String scheduleWeekly = '/schedule/weekly';
+
+  // Schedule
+  static const String scheduleAdd = '/schedule/';
+  static String scheduleByDoctor(int doctorId) => '/schedule/$doctorId';
+  static String scheduleById(int scheduleId) => '/schedule/$scheduleId';
+  static String scheduleByDay(int doctorId) => '/schedule/day/$doctorId';
 
   // Timeouts
   static const Duration connectTimeout = Duration(seconds: 15);
