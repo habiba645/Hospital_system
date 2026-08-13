@@ -17,12 +17,15 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
   AppointmentsCubit(this._repository)
       : super(const AppointmentsInitial());
 
-  Future<void> loadAppointments({bool resetPage = true}) async {
+  Future<void> loadAppointments({
+    bool resetPage = true,
+  }) async {
     if (resetPage) {
       _page = 1;
     }
 
     emit(const AppointmentsLoading());
+
     await _fetch();
   }
 
@@ -31,14 +34,18 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     _page = 1;
 
     emit(const AppointmentsLoading());
+
     await _fetch();
   }
 
-  Future<void> filterByStatus(AppointmentStatus? status) async {
+  Future<void> filterByStatus(
+    AppointmentStatus? status,
+  ) async {
     _statusFilter = status;
     _page = 1;
 
     emit(const AppointmentsLoading());
+
     await _fetch();
   }
 
@@ -46,7 +53,56 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     _page = page;
 
     emit(const AppointmentsLoading());
+
     await _fetch();
+  }
+
+  // ==========================================
+  // CREATE APPOINTMENT
+  // ==========================================
+
+  Future<int?> createAppointment({
+    required int patientId,
+    required int doctorId,
+    required int departmentId,
+    required int scheduleId,
+    required String appointmentDate,
+    required String appointmentTime,
+    String? notes,
+  }) async {
+    try {
+      final appointmentId =
+          await _repository.createAppointment(
+        patientId: patientId,
+        doctorId: doctorId,
+        departmentId: departmentId,
+        scheduleId: scheduleId,
+        appointmentDate: appointmentDate,
+        appointmentTime: appointmentTime,
+        notes: notes,
+      );
+
+      // Refresh appointments after successful creation.
+      await _fetch();
+
+      return appointmentId;
+    } on DioException catch (e) {
+      emit(
+        AppointmentsError(
+          _errorMessage(e),
+        ),
+      );
+
+      return null;
+    } catch (e) {
+      emit(
+        AppointmentsError(
+          e.toString(),
+        ),
+      );
+
+      return null;
+    }
   }
 
   Future<void> cancelAppointment(int id) async {
@@ -62,11 +118,17 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         silent: previous is AppointmentsLoaded,
       );
     } on DioException catch (e) {
-      emit(AppointmentsError(_errorMessage(e)));
+      emit(
+        AppointmentsError(
+          _errorMessage(e),
+        ),
+      );
     }
   }
 
-  Future<void> _fetch({bool silent = false}) async {
+  Future<void> _fetch({
+    bool silent = false,
+  }) async {
     if (silent && state is AppointmentsLoaded) {
       emit(
         (state as AppointmentsLoaded).copyWith(
@@ -76,11 +138,13 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     }
 
     try {
-      final page = await _repository.getAppointments(
+      final page =
+          await _repository.getAppointments(
         page: _page,
         limit: _limit,
         status: _statusFilter?.apiValue,
-        search: _query.isEmpty ? null : _query,
+        search:
+            _query.isEmpty ? null : _query,
       );
 
       emit(
@@ -91,7 +155,11 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         ),
       );
     } on DioException catch (e) {
-      emit(AppointmentsError(_errorMessage(e)));
+      emit(
+        AppointmentsError(
+          _errorMessage(e),
+        ),
+      );
     }
   }
 
@@ -101,7 +169,8 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     if (data is Map<String, dynamic>) {
       final message = data['message'];
 
-      if (message is String && message.isNotEmpty) {
+      if (message is String &&
+          message.isNotEmpty) {
         return message;
       }
     }

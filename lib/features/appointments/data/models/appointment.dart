@@ -1,43 +1,3 @@
-
-class AppointmentsPage {
-  final List<Appointment> appointments;
-  final int total;
-  final int page;
-  final int limit;
-  final int totalPages;
-
-  const AppointmentsPage({
-    required this.appointments,
-    required this.total,
-    required this.page,
-    required this.limit,
-    required this.totalPages,
-  });
-
-  factory AppointmentsPage.fromJson(
-    Map<String, dynamic> json,
-  ) {
-    final pagination =
-        json['pagination'] as Map<String, dynamic>? ?? const {};
-
-    return AppointmentsPage(
-      appointments:
-          (json['appointments'] as List<dynamic>? ?? [])
-              .map(
-                (e) => Appointment.fromJson(
-                  e as Map<String, dynamic>,
-                ),
-              )
-              .toList(),
-      total: pagination['total'] as int? ?? 0,
-      page: pagination['page'] as int? ?? 1,
-      limit: pagination['limit'] as int? ?? 20,
-      totalPages: pagination['totalPages'] as int? ?? 0,
-    );
-  }
-}
-
-
 enum AppointmentStatus {
   scheduled,
   completed,
@@ -76,6 +36,7 @@ extension AppointmentStatusApi on AppointmentStatus {
 
 class Appointment {
   final int id;
+
   final int patientId;
   final String patientName;
 
@@ -85,7 +46,7 @@ class Appointment {
   final int departmentId;
   final String department;
 
-  /// Contains the appointment date AND appointment time.
+  /// Contains appointment date + appointment time.
   final DateTime dateTime;
 
   final AppointmentStatus status;
@@ -112,53 +73,70 @@ class Appointment {
   factory Appointment.fromJson(
     Map<String, dynamic> json,
   ) {
-    /*
-      Backend response:
-
-      "appointment_date": "2026-08-14T21:00:00.000Z",
-      "appointment_time": "10:30:00"
-
-      We only take the DATE part from appointment_date,
-      because appointment_time contains the actual appointment time.
-
-      This also prevents UTC -> local timezone conversion
-      from accidentally changing the appointment date.
-    */
-
     final rawDate =
-        json['appointment_date'] as String;
-
-    final datePart =
-        rawDate.split('T').first;
-
-    final dateParts =
-        datePart.split('-');
+        json['appointment_date'] as String? ?? '';
 
     final rawTime =
-        json['appointment_time'] as String;
+        json['appointment_time'] as String? ??
+            '00:00:00';
 
-    final timeParts =
-        rawTime.split(':');
+    // Backend can return:
+    // 2026-08-12T21:00:00.000Z
+    //
+    // We only take:
+    // 2026-08-12
+    //
+    // because appointment_time contains
+    // the actual appointment time.
 
-    final year =
-        int.parse(dateParts[0]);
+    final datePart = rawDate.contains('T')
+        ? rawDate.split('T').first
+        : rawDate;
 
-    final month =
-        int.parse(dateParts[1]);
+    final dateParts = datePart.split('-');
+    final timeParts = rawTime.split(':');
 
-    final day =
-        int.parse(dateParts[2]);
+    final year = int.tryParse(
+          dateParts.length > 0
+              ? dateParts[0]
+              : '',
+        ) ??
+        0;
 
-    final hour =
-        int.parse(timeParts[0]);
+    final month = int.tryParse(
+          dateParts.length > 1
+              ? dateParts[1]
+              : '',
+        ) ??
+        1;
 
-    final minute =
-        int.parse(timeParts[1]);
+    final day = int.tryParse(
+          dateParts.length > 2
+              ? dateParts[2]
+              : '',
+        ) ??
+        1;
 
-    final second =
-        timeParts.length > 2
-            ? int.parse(timeParts[2])
-            : 0;
+    final hour = int.tryParse(
+          timeParts.length > 0
+              ? timeParts[0]
+              : '',
+        ) ??
+        0;
+
+    final minute = int.tryParse(
+          timeParts.length > 1
+              ? timeParts[1]
+              : '',
+        ) ??
+        0;
+
+    final second = int.tryParse(
+          timeParts.length > 2
+              ? timeParts[2]
+              : '',
+        ) ??
+        0;
 
     final mergedDateTime = DateTime(
       year,
@@ -171,24 +149,31 @@ class Appointment {
 
     return Appointment(
       id: json['appointment_id'] as int,
-      patientId: json['patient_id'] as int,
+
+      patientId:
+          json['patient_id'] as int,
+
       patientName:
           json['patient_name'] as String? ?? '',
 
       doctorId:
           json['doctor_id'] as int,
+
       doctorName:
           json['doctor_name'] as String? ?? '',
 
       departmentId:
           json['department_id'] as int,
+
       department:
           json['department_name'] as String? ?? '',
 
       dateTime: mergedDateTime,
 
-      status: AppointmentStatusApi.fromApi(
-        json['status'] as String? ?? 'Scheduled',
+      status:
+          AppointmentStatusApi.fromApi(
+        json['status'] as String? ??
+            'Scheduled',
       ),
 
       bookedBy:
@@ -203,6 +188,57 @@ class Appointment {
                   json['created_at'] as String,
                 )
               : null,
+    );
+  }
+}
+
+class AppointmentsPage {
+  final List<Appointment> appointments;
+
+  final int total;
+  final int page;
+  final int limit;
+  final int totalPages;
+
+  const AppointmentsPage({
+    required this.appointments,
+    required this.total,
+    required this.page,
+    required this.limit,
+    required this.totalPages,
+  });
+
+  factory AppointmentsPage.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final pagination =
+        json['pagination']
+                as Map<String, dynamic>? ??
+            const {};
+
+    return AppointmentsPage(
+      appointments:
+          (json['appointments']
+                      as List<dynamic>? ??
+                  [])
+              .map(
+                (e) => Appointment.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList(),
+
+      total:
+          pagination['total'] as int? ?? 0,
+
+      page:
+          pagination['page'] as int? ?? 1,
+
+      limit:
+          pagination['limit'] as int? ?? 20,
+
+      totalPages:
+          pagination['totalPages'] as int? ?? 0,
     );
   }
 }
