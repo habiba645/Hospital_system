@@ -36,7 +36,6 @@ class AppointmentsRepository {
     return AppointmentsPage.fromJson(data);
   }
 
-  /// Gets all appointments across all backend pages.
   Future<List<Appointment>> getAllAppointments({
     int limit = 100,
   }) async {
@@ -81,6 +80,10 @@ class AppointmentsRepository {
     );
   }
 
+  // ============================
+  // CREATE APPOINTMENT
+  // ============================
+
   Future<int> createAppointment({
     required int patientId,
     required int doctorId,
@@ -99,11 +102,18 @@ class AppointmentsRepository {
         'schedule_id': scheduleId,
         'appointment_date': appointmentDate,
         'appointment_time': appointmentTime,
-        if (notes != null) 'notes': notes,
+        if (notes != null && notes.isNotEmpty)
+          'notes': notes,
       },
     );
 
-    final data = response.data as Map<String, dynamic>;
+    final data = response.data;
+
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException(
+        'Invalid create appointment response.',
+      );
+    }
 
     return data['appointment_id'] as int;
   }

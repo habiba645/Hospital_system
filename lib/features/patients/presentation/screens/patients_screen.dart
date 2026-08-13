@@ -154,13 +154,35 @@ class _PatientsViewState extends State<_PatientsView> {
                             }
                           },
                         ),
+                        // ✅ Fixed: DatePicker instead of free-text field.
+                        // Guarantees a valid YYYY-MM-DD format is always
+                        // sent to the backend (was previously causing a
+                        // 500 error: "Incorrect date value: '17/8/2005'").
                         TextFormField(
                           controller: dobController,
+                          readOnly: true,
                           decoration: const InputDecoration(
-                            labelText: 'Date of Birth (YYYY-MM-DD)',
+                            labelText: 'Date of Birth',
+                            suffixIcon: Icon(Icons.calendar_today),
                           ),
                           validator: (v) =>
                               v == null || v.isEmpty ? 'Required' : null,
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: dialogContext,
+                              initialDate: DateTime(2000, 1, 1),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null) {
+                              final formatted = '${picked.year.toString().padLeft(4, '0')}-'
+                                  '${picked.month.toString().padLeft(2, '0')}-'
+                                  '${picked.day.toString().padLeft(2, '0')}';
+                              setDialogState(
+                                () => dobController.text = formatted,
+                              );
+                            }
+                          },
                         ),
                         TextFormField(
                           controller: phoneController,

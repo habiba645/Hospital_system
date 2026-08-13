@@ -24,7 +24,7 @@ class PatientModel {
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
     return PatientModel(
-      id: json['id'],
+      id: json['patient_id'], // ✅ fixed: backend returns "patient_id", not "id"
       fullName: json['full_name'] ?? '',
       nationalId: json['national_id'] ?? '',
       gender: json['gender'] ?? '',
